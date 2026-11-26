@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "avarice:block/dungeon_gateway"
+    }
+  }
+}
