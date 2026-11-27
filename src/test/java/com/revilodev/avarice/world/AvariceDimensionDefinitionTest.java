@@ -18,11 +18,12 @@ class AvariceDimensionDefinitionTest {
     }
 
     @Test
-    void voidTypeHasNoEndEnvironment() {
+    void voidTypeUsesTheAbyssSkybox() {
         JsonObject type = resource("data/avarice/dimension_type/void.json");
         assertFalse(type.get("has_ender_dragon_fight").getAsBoolean());
         assertFalse(type.get("has_skylight").getAsBoolean());
-        assertEquals("none", type.get("skybox").getAsString());
+        assertEquals("end", type.get("skybox").getAsString());
+        assertEquals("avarice:abyss", type.getAsJsonObject("attributes").get("neoforge:custom_skybox").getAsString());
     }
 
     private static JsonObject resource(String path) {

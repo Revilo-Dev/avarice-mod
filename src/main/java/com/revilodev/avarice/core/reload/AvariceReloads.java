@@ -1,8 +1,8 @@
 package com.revilodev.avarice.core.reload;
 
-import com.revilodev.avarice.core.config.UiConfigService;
-import com.revilodev.avarice.devtools.items.ItemDefinitionService;
-import com.revilodev.avarice.devtools.values.ValueService;
+import com.revilodev.avarice.core.config.UiConfigStore;
+import com.revilodev.avarice.devtools.items.ItemDefs;
+import com.revilodev.avarice.devtools.values.Values;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -18,9 +18,9 @@ public final class AvariceReloads {
 
     public static synchronized void initialize() {
         if (initialized) return;
-        MANAGER.register(domain(UI, UiConfigService::reload));
-        MANAGER.register(domain(VALUES, ValueService::reload));
-        MANAGER.register(domain(ITEMS, ItemDefinitionService::reload));
+        MANAGER.register(domain(UI, UiConfigStore::reload));
+        MANAGER.register(domain(VALUES, Values::reload));
+        MANAGER.register(domain(ITEMS, ItemDefs::reload));
         initialized = true;
     }
 

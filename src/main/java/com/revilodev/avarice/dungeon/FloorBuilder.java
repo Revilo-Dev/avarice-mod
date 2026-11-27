@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
-public final class PlaceholderFloorService {
+public final class FloorBuilder {
     public static final int MIN_FLOOR = 1;
     public static final int MAX_FLOOR = 3;
     private static final int ROOM_RADIUS = 10;

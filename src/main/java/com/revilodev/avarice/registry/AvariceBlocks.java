@@ -3,6 +3,7 @@ package com.revilodev.avarice.registry;
 import com.revilodev.avarice.Avarice;
 import com.revilodev.avarice.world.block.DungeonGatewayBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -13,6 +14,7 @@ public final class AvariceBlocks {
             DungeonGatewayBlock::new,
             properties -> properties.strength(-1.0F, 3_600_000.0F).lightLevel(state -> 12).sound(SoundType.AMETHYST).noLootTable()
     );
+    public static final DeferredBlock<Block> COIN_PILE = BLOCKS.registerBlock("coin_pile", Block::new, properties -> properties.strength(0.2F).sound(SoundType.METAL).noLootTable());
 
     private AvariceBlocks() { }
 }

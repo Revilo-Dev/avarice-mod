@@ -11,12 +11,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** Owns the active UI snapshot. Failed loads never replace the last valid snapshot. */
-public final class UiConfigService {
+public final class UiConfigStore {
     public static final Path FILE = Path.of("config", "avarice-dev", "ui.json");
     private static final AtomicReference<UiConfig> ACTIVE = new AtomicReference<>();
     private static final List<java.util.function.Consumer<UiConfig>> LISTENERS = new CopyOnWriteArrayList<>();
     private static final UiConfigParser PARSER = new UiConfigParser();
-    private UiConfigService() { }
+    private UiConfigStore() { }
     public static synchronized void initialize() { if (ACTIVE.get() == null) reload(); }
     public static UiConfig current() { UiConfig config = ACTIVE.get(); if (config == null) throw new IllegalStateException("UI config not initialized"); return config; }
     public static AutoCloseable subscribe(java.util.function.Consumer<UiConfig> listener) { LISTENERS.add(listener); return () -> LISTENERS.remove(listener); }

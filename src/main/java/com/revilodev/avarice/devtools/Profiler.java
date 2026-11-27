@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class DevelopmentProfiler {
+public final class Profiler {
     private static final AtomicBoolean ENABLED = new AtomicBoolean();
     private static final Map<String, Measurement> MEASUREMENTS = new ConcurrentHashMap<>();
 
-    private DevelopmentProfiler() { }
+    private Profiler() { }
 
     public static boolean toggle() {
         while (true) {

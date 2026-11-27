@@ -19,6 +19,9 @@ public final class AvariceHud {
     private static final Identifier HEALTH = texture("hud-bar_healtht");
     private static final Identifier LEVEL = texture("hud-bar_level");
     private static final Identifier SOULS = texture("hud-bar_souls");
+    private static final int HOTBAR_START_X = 2;
+    private static final int HOTBAR_SLOT_Y = 21;
+    private static final int SLOT_CONTENT_INSET = 1;
 
     private AvariceHud() { }
 
@@ -64,22 +67,27 @@ public final class AvariceHud {
 
     private static void renderHotbar(GuiGraphicsExtractor graphics, Font font, Player player, int x, int y) {
         int selected = player.getInventory().getSelectedSlot();
-        int slotY = y + 20;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, SELECTED_SLOT, x + selected * 20, slotY, 0, 0, 18, 18, 18, 18);
+        int slotY = y + HOTBAR_SLOT_Y;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, SELECTED_SLOT, hotbarSlotX(x, selected), slotY, 0, 0, 18, 18, 18, 18);
         for (int index = 0; index < 9; index++) {
             ItemStack stack = player.getInventory().getItem(index);
-            int itemY = y + 23;
-            int slotX = x + 2 + index * 20;
+            int itemY = slotY + SLOT_CONTENT_INSET;
+            int slotX = hotbarSlotX(x, index) + SLOT_CONTENT_INSET;
             graphics.item(player, stack, slotX, itemY, 0);
             graphics.itemDecorations(font, stack, slotX, itemY);
         }
         ItemStack offhand = player.getOffhandItem();
         if (!offhand.isEmpty()) {
-            int offhandX = x - 23;
-            graphics.blit(RenderPipelines.GUI_TEXTURED, OFFHAND, offhandX, y + 18, 0, 0, 22, 22, 22, 22);
-            graphics.item(player, offhand, offhandX + 3, y + 21, 0);
-            graphics.itemDecorations(font, offhand, offhandX + 3, y + 21);
+            int offhandX = x - 21;
+            int offhandY = y + 19;
+            graphics.blit(RenderPipelines.GUI_TEXTURED, OFFHAND, offhandX, offhandY, 0, 0, 22, 22, 22, 22);
+            graphics.item(player, offhand, offhandX + 3, offhandY + 3, 0);
+            graphics.itemDecorations(font, offhand, offhandX + 3, offhandY + 3);
         }
+    }
+
+    private static int hotbarSlotX(int hudX, int index) {
+        return hudX + HOTBAR_START_X + index * 20;
     }
 
     private static void outlinedCentered(GuiGraphicsExtractor graphics, Font font, String value, int centerX, int y, int color) {

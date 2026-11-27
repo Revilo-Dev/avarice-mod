@@ -10,14 +10,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
-public final class AbyssService {
-    private static final int PLATFORM_RADIUS = 12;
+public final class AbyssManager {
+    private static final int LEGACY_PLATFORM_RADIUS = 12;
     private static final int END_FEATURE_CLEANUP_RADIUS = 16;
 
     private final MinecraftServer server;
     private final DungeonRunSavedData data;
 
-    public AbyssService(MinecraftServer server, DungeonRunSavedData data) {
+    public AbyssManager(MinecraftServer server, DungeonRunSavedData data) {
         this.server = server;
         this.data = data;
     }
@@ -30,8 +30,11 @@ public final class AbyssService {
         ServerLevel level = level();
         if (level == null) return false;
         level.getChunkAt(AvariceDimensions.ABYSS_SPAWN);
+        if (!data.abyssPlatformRemoved()) {
+            removeLegacyPlatform(level);
+            data.markAbyssPlatformRemoved();
+        }
         if (!data.abyssInitialized()) {
-            buildPlatform(level);
             data.markAbyssInitialized();
         }
         if (!data.abyssEnvironmentSanitized()) {
@@ -52,16 +55,12 @@ public final class AbyssService {
         return DungeonLocation.at(AvariceDimensions.ABYSS, AvariceDimensions.ABYSS_SPAWN, 180.0F);
     }
 
-    private void buildPlatform(ServerLevel level) {
-        for (int x = -PLATFORM_RADIUS; x <= PLATFORM_RADIUS; x++) {
-            for (int z = -PLATFORM_RADIUS; z <= PLATFORM_RADIUS; z++) {
-                BlockPos pos = new BlockPos(x, AvariceDimensions.PLATFORM_Y, z);
-                boolean border = Math.abs(x) == PLATFORM_RADIUS || Math.abs(z) == PLATFORM_RADIUS;
-                level.setBlock(pos, (border ? Blocks.POLISHED_BLACKSTONE_BRICKS : Blocks.DEEPSLATE_TILES).defaultBlockState(), Block.UPDATE_ALL);
+    private void removeLegacyPlatform(ServerLevel level) {
+        for (int x = -LEGACY_PLATFORM_RADIUS; x <= LEGACY_PLATFORM_RADIUS; x++) {
+            for (int z = -LEGACY_PLATFORM_RADIUS; z <= LEGACY_PLATFORM_RADIUS; z++) {
+                level.setBlock(new BlockPos(x, AvariceDimensions.PLATFORM_Y, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                level.setBlock(new BlockPos(x, AvariceDimensions.ABYSS_FLOOR_Y, z), Blocks.BARRIER.defaultBlockState(), Block.UPDATE_ALL);
             }
-        }
-        for (BlockPos light : new BlockPos[]{new BlockPos(-8, 64, -8), new BlockPos(8, 64, -8), new BlockPos(-8, 64, 8), new BlockPos(8, 64, 8)}) {
-            level.setBlock(light, Blocks.SEA_LANTERN.defaultBlockState(), Block.UPDATE_ALL);
         }
     }
 
@@ -70,7 +69,7 @@ public final class AbyssService {
         if (!level.getBlockState(spawn.below()).isAir() && level.getBlockState(spawn).isAir() && level.getBlockState(spawn.above()).isAir()) return;
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
-                level.setBlock(spawn.below().offset(x, 0, z), Blocks.DEEPSLATE_TILES.defaultBlockState(), Block.UPDATE_ALL);
+                level.setBlock(spawn.below().offset(x, 0, z), Blocks.BARRIER.defaultBlockState(), Block.UPDATE_ALL);
                 level.setBlock(spawn.offset(x, 0, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
                 level.setBlock(spawn.above().offset(x, 0, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
             }

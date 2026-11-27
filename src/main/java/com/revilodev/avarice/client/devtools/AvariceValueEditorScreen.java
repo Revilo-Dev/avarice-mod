@@ -2,7 +2,7 @@ package com.revilodev.avarice.client.devtools;
 
 import com.revilodev.avarice.devtools.values.Percentage;
 import com.revilodev.avarice.devtools.values.ValueDefinition;
-import com.revilodev.avarice.devtools.values.ValueService;
+import com.revilodev.avarice.devtools.values.Values;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
@@ -28,7 +28,7 @@ public final class AvariceValueEditorScreen extends Screen {
 
     @Override
     protected void init() {
-        if (draft.isEmpty()) draft.putAll(ValueService.current());
+        if (draft.isEmpty()) draft.putAll(Values.current());
         selectedId = draft.keySet().stream().findFirst().orElse(null);
         ValueDefinition value = selected();
         if (value == null) return;
@@ -53,8 +53,8 @@ public final class AvariceValueEditorScreen extends Screen {
     private void adjust(double amount) { ValueDefinition value = selected(); if (value != null) setValue(value.currentValue() + amount); }
     private void specialAdjustment() { ValueDefinition value = selected(); if (value == null) return; setValue(value.kind() == ValueDefinition.Kind.PERCENTAGE ? Percentage.points(value.currentValue()).addPoints(5).asPercent() : value.currentValue() + step(value)); }
     private void setValue(double value) { ValueDefinition current = selected(); if (current == null) return; draft.put(selectedId, current.withCurrentValue(value)); refreshInput(); }
-    private void applyDraft() { try { ValueService.apply(draft); feedback = "Values applied"; } catch (RuntimeException exception) { feedback = "Values are invalid"; } }
-    private void saveDraft() { try { ValueService.save(draft); feedback = "Values saved"; } catch (IOException | RuntimeException exception) { feedback = "Could not save values"; } }
+    private void applyDraft() { try { Values.apply(draft); feedback = "Values applied"; } catch (RuntimeException exception) { feedback = "Values are invalid"; } }
+    private void saveDraft() { try { Values.save(draft); feedback = "Values saved"; } catch (IOException | RuntimeException exception) { feedback = "Could not save values"; } }
     private void refreshInput() { ValueDefinition value = selected(); if (value == null || input == null) return; updatingInput = true; input.setValue(NUMBER.format(value.currentValue())); slider.setNormalizedValue(normalized(value)); updatingInput = false; }
     private ValueDefinition selected() { return selectedId == null ? null : draft.get(selectedId); }
     private static double normalized(ValueDefinition value) { return value.maximum() == value.minimum() ? 0 : Math.clamp((value.currentValue() - value.minimum()) / (value.maximum() - value.minimum()), 0, 1); }

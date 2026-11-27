@@ -19,7 +19,8 @@ public final class DungeonRunSavedData extends SavedData {
     public static final Codec<DungeonRunSavedData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             DungeonRun.CODEC.listOf().optionalFieldOf("runs", List.of()).forGetter(DungeonRunSavedData::allRuns),
             Codec.BOOL.optionalFieldOf("abyss_initialized", false).forGetter(DungeonRunSavedData::abyssInitialized),
-            Codec.BOOL.optionalFieldOf("abyss_environment_sanitized", false).forGetter(DungeonRunSavedData::abyssEnvironmentSanitized)
+            Codec.BOOL.optionalFieldOf("abyss_environment_sanitized", false).forGetter(DungeonRunSavedData::abyssEnvironmentSanitized),
+            Codec.BOOL.optionalFieldOf("abyss_platform_removed", false).forGetter(DungeonRunSavedData::abyssPlatformRemoved)
     ).apply(instance, DungeonRunSavedData::new));
     public static final SavedDataType<DungeonRunSavedData> TYPE = new SavedDataType<>(
             Identifier.fromNamespaceAndPath(Avarice.MODID, "dungeon_runs"),
@@ -30,15 +31,17 @@ public final class DungeonRunSavedData extends SavedData {
     private final Map<UUID, DungeonRun> runs = new LinkedHashMap<>();
     private boolean abyssInitialized;
     private boolean abyssEnvironmentSanitized;
+    private boolean abyssPlatformRemoved;
 
     public DungeonRunSavedData() { }
 
-    private DungeonRunSavedData(List<DungeonRun> runs, boolean abyssInitialized, boolean abyssEnvironmentSanitized) {
+    private DungeonRunSavedData(List<DungeonRun> runs, boolean abyssInitialized, boolean abyssEnvironmentSanitized, boolean abyssPlatformRemoved) {
         for (DungeonRun run : runs) {
             if (this.runs.put(run.runId(), run) != null) throw new IllegalArgumentException("duplicate run id " + run.runId());
         }
         this.abyssInitialized = abyssInitialized;
         this.abyssEnvironmentSanitized = abyssEnvironmentSanitized;
+        this.abyssPlatformRemoved = abyssPlatformRemoved;
     }
 
     public static DungeonRunSavedData get(MinecraftServer server) {
@@ -79,6 +82,16 @@ public final class DungeonRunSavedData extends SavedData {
     public void markAbyssEnvironmentSanitized() {
         if (abyssEnvironmentSanitized) return;
         abyssEnvironmentSanitized = true;
+        setDirty();
+    }
+
+    public boolean abyssPlatformRemoved() {
+        return abyssPlatformRemoved;
+    }
+
+    public void markAbyssPlatformRemoved() {
+        if (abyssPlatformRemoved) return;
+        abyssPlatformRemoved = true;
         setDirty();
     }
 

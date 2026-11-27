@@ -1,6 +1,6 @@
 package com.revilodev.avarice.client.ui.animation;
 
-import com.revilodev.avarice.devtools.DevelopmentProfiler;
+import com.revilodev.avarice.devtools.Profiler;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -23,7 +23,7 @@ public final class UiAnimationAdapter {
     public void advanceFrame() {
         long start = System.nanoTime();
         engine.advanceFrame();
-        DevelopmentProfiler.record("ui.animations", start);
+        Profiler.record("ui.animations", start);
     }
 
     public void cancel(String id) {

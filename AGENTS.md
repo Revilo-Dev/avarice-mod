@@ -265,6 +265,12 @@ Proposed examples:
   // Here we are going to perform several important steps in order to...
   // TODO: fix this later!
   Do not add generic file headers or comments explaining class names or trivial getters. Existing comments need not be rewritten unless changing that code.
+15. Naming style — mandatory for code agents
+- Use short, domain-first names that a developer would naturally use in conversation.
+- Prefer names such as `PlayerData`, `AbyssManager`, `Network`, `Coins`, and `FloorBuilder`.
+- Do not use filler words such as `Avarice`, `Service`, `Development`, `Temporary`, `Helper`, or `Utility` in Java type names unless they distinguish a real public API.
+- Use `Manager` only for a type that owns lifecycle or coordination; use a noun for data and a verb-free noun for focused operations.
+- Keep package names and resource identifiers stable unless a migration is explicitly required.
 15. Expectations for any implementing AI
 1. Inspect the repository and current build files before modifying anything.
 2. Identify whether work belongs to UI, reload, shared utility, or authoritative server logic.

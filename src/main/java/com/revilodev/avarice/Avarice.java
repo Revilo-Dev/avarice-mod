@@ -8,17 +8,17 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
 
-import com.revilodev.avarice.core.config.UiConfigService;
+import com.revilodev.avarice.core.config.UiConfigStore;
 import com.revilodev.avarice.core.reload.AvariceReloads;
-import com.revilodev.avarice.devtools.values.ValueService;
-import com.revilodev.avarice.devtools.items.ItemDefinitionService;
+import com.revilodev.avarice.devtools.values.Values;
+import com.revilodev.avarice.devtools.items.ItemDefs;
 import com.revilodev.avarice.registry.AvariceDataComponents;
 import com.revilodev.avarice.registry.AvariceBlocks;
 import com.revilodev.avarice.registry.AvariceCreativeTabs;
 import com.revilodev.avarice.registry.AvariceItems;
 import com.revilodev.avarice.registry.AvariceMenus;
 import com.revilodev.avarice.datagen.AvariceDataGenerators;
-import com.revilodev.avarice.network.AvariceNetwork;
+import com.revilodev.avarice.network.Network;
 
 @Mod(Avarice.MODID)
 public class Avarice {
@@ -27,15 +27,15 @@ public class Avarice {
 
     public Avarice(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(AvariceDataGenerators::gatherData);
-        modEventBus.addListener(AvariceNetwork::register);
+        modEventBus.addListener(Network::register);
         AvariceDataComponents.COMPONENTS.register(modEventBus);
         AvariceBlocks.BLOCKS.register(modEventBus);
         AvariceItems.ITEMS.register(modEventBus);
         AvariceMenus.MENUS.register(modEventBus);
         AvariceCreativeTabs.TABS.register(modEventBus);
-        UiConfigService.initialize();
-        ValueService.initialize();
-        ItemDefinitionService.initialize();
+        UiConfigStore.initialize();
+        Values.initialize();
+        ItemDefs.initialize();
         AvariceReloads.initialize();
     }
 }

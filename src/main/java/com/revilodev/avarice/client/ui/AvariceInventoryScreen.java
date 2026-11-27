@@ -2,7 +2,6 @@ package com.revilodev.avarice.client.ui;
 
 import com.revilodev.avarice.Avarice;
 import com.revilodev.avarice.inventory.AvariceInventoryMenu;
-import com.revilodev.avarice.inventory.AvariceInventorySlots;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -24,9 +23,10 @@ public final class AvariceInventoryScreen extends AbstractContainerScreen<Avaric
     private float mouseX;
     private float mouseY;
 
-    public AvariceInventoryScreen(AvariceInventoryMenu menu, Inventory inventory, Component title) { super(menu, inventory, title, 178, 165); }
-    @Override protected void init() { super.init(); leftPos--; topPos--; titleLabelX = 102; titleLabelY = 11; inventoryLabelX = 7; inventoryLabelY = 72; }
+    public AvariceInventoryScreen(AvariceInventoryMenu menu, Inventory inventory, Component title) { super(menu, inventory, title, 178, 164); }
+    @Override protected void init() { super.init(); leftPos--; topPos--; }
     @Override public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) { this.mouseX = mouseX; this.mouseY = mouseY; super.extractRenderState(graphics, mouseX, mouseY, partialTick); }
+    @Override protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) { }
     @Override public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight);
@@ -38,9 +38,9 @@ public final class AvariceInventoryScreen extends AbstractContainerScreen<Avaric
         drawSprite(graphics, OFFHAND, 81, 63);
         drawSlotFrame(graphics, 81, 45);
         drawSprite(graphics, MAGNET, 82, 46);
-        drawSprite(graphics, SWORD, 63, 144);
-        drawSprite(graphics, SWORD, 81, 144);
-        drawSprite(graphics, ARTIFACT, 99, 144);
+        drawSprite(graphics, SWORD, AvariceInventoryMenu.hotbarSlotX(3), AvariceInventoryMenu.HOTBAR_SLOT_Y);
+        drawSprite(graphics, SWORD, AvariceInventoryMenu.hotbarSlotX(4), AvariceInventoryMenu.HOTBAR_SLOT_Y);
+        drawSprite(graphics, ARTIFACT, AvariceInventoryMenu.hotbarSlotX(5), AvariceInventoryMenu.HOTBAR_SLOT_Y);
     }
     private void drawSprite(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y) { graphics.blit(RenderPipelines.GUI_TEXTURED, sprite, leftPos + x, topPos + y, 0, 0, 16, 16, 16, 16); }
     private void drawSlotFrame(GuiGraphicsExtractor graphics, int x, int y) { int left = leftPos + x; int top = topPos + y; graphics.fill(left, top, left + 18, top + 18, 0xFF0B1118); graphics.fill(left + 1, top + 1, left + 17, top + 17, 0xFF1D2834); graphics.fill(left + 2, top + 2, left + 16, top + 16, 0xFF101820); }

@@ -1,7 +1,7 @@
 package com.revilodev.avarice.inventory;
 
 import com.revilodev.avarice.registry.AvariceMenus;
-import com.revilodev.avarice.persistence.PlayerDevelopmentSavedData;
+import com.revilodev.avarice.persistence.PlayerDataStore;
 import java.util.Objects;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 public final class AvariceInventoryMenu extends AbstractContainerMenu {
     private static final Identifier PRIMARY_ATTACK_SPEED = Identifier.fromNamespaceAndPath("avarice", "primary_weapon_attack_speed");
     private static final AttributeModifier PRIMARY_ATTACK_SPEED_MODIFIER = new AttributeModifier(PRIMARY_ATTACK_SPEED, 0.05, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+    public static final int HOTBAR_SLOT_Y = 143;
     private final Player player;
 
     public AvariceInventoryMenu(int containerId, Inventory inventory) {
@@ -53,8 +54,12 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
     private void addHotbarSlots(Inventory inventory) {
         for (int index = 0; index < 9; index++) {
             AvariceInventorySlots.Role role = switch (index) { case 3 -> AvariceInventorySlots.Role.PRIMARY; case 4 -> AvariceInventorySlots.Role.SECONDARY; case 5 -> AvariceInventorySlots.Role.TRINKET; default -> AvariceInventorySlots.Role.GENERAL; };
-            addSlot(new RestrictedSlot(inventory, index, 9 + index * 18, 144, player, role));
+            addSlot(new RestrictedSlot(inventory, index, hotbarSlotX(index), HOTBAR_SLOT_Y, player, role));
         }
+    }
+
+    public static int hotbarSlotX(int index) {
+        return 9 + index * 18 - (index < 2 ? 1 : 0);
     }
 
     @Override public void broadcastChanges() { super.broadcastChanges(); updatePrimaryAttackSpeed(); }
@@ -105,13 +110,13 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
         @Override public void clearContent() { writeItem(ItemStack.EMPTY); }
 
         private ItemStack readItem() {
-            if (player instanceof ServerPlayer serverPlayer) return PlayerDevelopmentSavedData.get(serverPlayer.level().getServer()).magnetSlot(player.getUUID());
+            if (player instanceof ServerPlayer serverPlayer) return PlayerDataStore.get(serverPlayer.level().getServer()).magnetSlot(player.getUUID());
             return clientItem;
         }
 
         private void writeItem(ItemStack itemStack) {
             ItemStack stored = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copyWithCount(1);
-            if (player instanceof ServerPlayer serverPlayer) PlayerDevelopmentSavedData.get(serverPlayer.level().getServer()).setMagnetSlot(player.getUUID(), stored);
+            if (player instanceof ServerPlayer serverPlayer) PlayerDataStore.get(serverPlayer.level().getServer()).setMagnetSlot(player.getUUID(), stored);
             else clientItem = stored;
         }
     }

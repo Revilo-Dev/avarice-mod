@@ -12,7 +12,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class AvariceItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Avarice.MODID);
-    public static final DeferredHolder<Item, ReloadableDefinitionItem> DEV_RELIC = ITEMS.register("dev_relic", id -> new ReloadableDefinitionItem(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id))));
-    public static final DeferredItem<BlockItem> DUNGEON_GATEWAY = ITEMS.registerSimpleBlockItem(AvariceBlocks.DUNGEON_GATEWAY);
+    public static final DeferredHolder<Item, ReloadableDefinitionItem> DEV_RELIC = ITEMS.register("dev_relic", id -> new ReloadableDefinitionItem(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id)).stacksTo(99)));
+    public static final DeferredItem<BlockItem> DUNGEON_GATEWAY = ITEMS.register("dungeon_gateway", id -> new BlockItem(AvariceBlocks.DUNGEON_GATEWAY.get(), new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id)).stacksTo(99)));
+    public static final DeferredItem<BlockItem> COIN_PILE = ITEMS.register("coin_pile", id -> new BlockItem(AvariceBlocks.COIN_PILE.get(), new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id)).stacksTo(99)));
     private AvariceItems() { }
 }

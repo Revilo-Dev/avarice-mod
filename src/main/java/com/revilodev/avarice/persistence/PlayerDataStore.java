@@ -13,43 +13,43 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.item.ItemStack;
 
-public final class PlayerDevelopmentSavedData extends SavedData {
-    public static final Codec<PlayerDevelopmentSavedData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            PlayerDevelopmentData.CODEC.listOf().optionalFieldOf("players", List.of()).forGetter(PlayerDevelopmentSavedData::all)
-    ).apply(instance, PlayerDevelopmentSavedData::new));
-    public static final SavedDataType<PlayerDevelopmentSavedData> TYPE = new SavedDataType<>(
-            Identifier.fromNamespaceAndPath(Avarice.MODID, "player_development"), PlayerDevelopmentSavedData::new, CODEC
+public final class PlayerDataStore extends SavedData {
+    public static final Codec<PlayerDataStore> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            PlayerData.CODEC.listOf().optionalFieldOf("players", List.of()).forGetter(PlayerDataStore::all)
+    ).apply(instance, PlayerDataStore::new));
+    public static final SavedDataType<PlayerDataStore> TYPE = new SavedDataType<>(
+            Identifier.fromNamespaceAndPath(Avarice.MODID, "player_development"), PlayerDataStore::new, CODEC
     );
 
-    private final Map<UUID, PlayerDevelopmentData> players = new LinkedHashMap<>();
+    private final Map<UUID, PlayerData> players = new LinkedHashMap<>();
 
-    public PlayerDevelopmentSavedData() { }
+    public PlayerDataStore() { }
 
-    private PlayerDevelopmentSavedData(List<PlayerDevelopmentData> values) {
-        for (PlayerDevelopmentData value : values) {
+    private PlayerDataStore(List<PlayerData> values) {
+        for (PlayerData value : values) {
             if (players.putIfAbsent(value.playerId(), value) != null) throw new IllegalArgumentException("Duplicate player data: " + value.playerId());
         }
     }
 
-    public static PlayerDevelopmentSavedData get(MinecraftServer server) {
+    public static PlayerDataStore get(MinecraftServer server) {
         return server.getDataStorage().computeIfAbsent(TYPE);
     }
 
-    public List<PlayerDevelopmentData> all() {
+    public List<PlayerData> all() {
         return List.copyOf(players.values());
     }
 
-    public PlayerDevelopmentData getOrCreate(UUID playerId) {
-        PlayerDevelopmentData current = players.get(playerId);
+    public PlayerData getOrCreate(UUID playerId) {
+        PlayerData current = players.get(playerId);
         if (current != null) return current;
-        PlayerDevelopmentData created = PlayerDevelopmentData.defaults(playerId);
+        PlayerData created = PlayerData.defaults(playerId);
         players.put(playerId, created);
         setDirty();
         return created;
     }
 
-    public PlayerDevelopmentData revise(UUID playerId) {
-        PlayerDevelopmentData next = getOrCreate(playerId).nextRevision();
+    public PlayerData revise(UUID playerId) {
+        PlayerData next = getOrCreate(playerId).nextRevision();
         players.put(playerId, next);
         setDirty();
         return next;
@@ -63,4 +63,7 @@ public final class PlayerDevelopmentSavedData extends SavedData {
         players.put(playerId, getOrCreate(playerId).withMagnetSlot(itemStack));
         setDirty();
     }
+
+    public long coins(UUID playerId) { return getOrCreate(playerId).coins(); }
+    public void setCoins(UUID playerId, long amount) { players.put(playerId, getOrCreate(playerId).withCoins(amount)); setDirty(); }
 }

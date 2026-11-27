@@ -14,7 +14,7 @@ public final class ReloadableDefinitionItem extends Item {
     public ReloadableDefinitionItem(Properties properties) { super(properties); }
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag) {
         String id = stack.get(AvariceDataComponents.DEFINITION_ID.get());
-        ItemDefinition definition = ItemDefinitionService.get(id == null ? "dev_relic" : id);
+        ItemDefinition definition = ItemDefs.get(id == null ? "dev_relic" : id);
         if (definition == null) { lines.accept(Component.literal("Missing definition: " + id)); return; }
         lines.accept(Component.literal(definition.description()).setStyle(Style.EMPTY.withColor(parseColor(definition.color()))));
         definition.tooltip().forEach(line -> lines.accept(Component.literal(line)));

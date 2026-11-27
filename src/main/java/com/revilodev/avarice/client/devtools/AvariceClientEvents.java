@@ -3,11 +3,11 @@ package com.revilodev.avarice.client.devtools;
 import com.revilodev.avarice.Avarice;
 import com.revilodev.avarice.client.ui.AvariceUiScreen;
 import com.revilodev.avarice.client.ui.ClientScreenAccess;
-import com.revilodev.avarice.core.config.UiConfigService;
+import com.revilodev.avarice.core.config.UiConfigStore;
 import com.revilodev.avarice.core.reload.AvariceReloads;
 import com.revilodev.avarice.core.reload.ReloadManager;
 import com.revilodev.avarice.core.reload.ConfigFileWatcher;
-import com.revilodev.avarice.devtools.values.ValueService;
+import com.revilodev.avarice.devtools.values.Values;
 import com.revilodev.avarice.network.OpenAvariceInventoryPayload;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
@@ -49,7 +49,7 @@ public final class AvariceClientEvents {
     }
     @SubscribeEvent public static void registerCommand(RegisterClientCommandsEvent event) {
         if (!developmentEnabled()) return;
-        event.getDispatcher().register(Commands.literal("avarice").then(Commands.literal("dev").then(Commands.literal("ui").executes(context -> { ClientScreenAccess.open(new AvariceUiScreen()); return 1; })).then(Commands.literal("values").executes(context -> { boolean success = ValueService.reload(); notify(success ? "Values reloaded" : "Values reload failed"); return success ? 1 : 0; }))));
+        event.getDispatcher().register(Commands.literal("avarice").then(Commands.literal("dev").then(Commands.literal("ui").executes(context -> { ClientScreenAccess.open(new AvariceUiScreen()); return 1; })).then(Commands.literal("values").executes(context -> { boolean success = Values.reload(); notify(success ? "Values reloaded" : "Values reload failed"); return success ? 1 : 0; }))));
     }
     @SubscribeEvent public static void startWatcher(ClientStartedEvent event) {
         event.getClient().options.keyInventory.setKey(InputConstants.UNKNOWN);
@@ -57,7 +57,7 @@ public final class AvariceClientEvents {
         KeyMapping.resetMapping();
         event.getClient().options.save();
         if (!developmentEnabled() || watcher != null) return;
-        try { watcher = new ConfigFileWatcher(UiConfigService.FILE.getParent(), event.getClient()::execute, AvariceClientEvents::reloadChanged); }
+        try { watcher = new ConfigFileWatcher(UiConfigStore.FILE.getParent(), event.getClient()::execute, AvariceClientEvents::reloadChanged); }
         catch (java.io.IOException exception) { Avarice.LOGGER.warn("Avarice automatic configuration reload is unavailable", exception); }
     }
     @SubscribeEvent public static void stopWatcher(ClientStoppingEvent event) {

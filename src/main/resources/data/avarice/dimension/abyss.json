@@ -6,7 +6,12 @@
       "biome": "minecraft:the_void",
       "features": false,
       "lakes": false,
-      "layers": []
+      "layers": [
+        {
+          "height": 1,
+          "block": "minecraft:barrier"
+        }
+      ]
     }
   }
 }

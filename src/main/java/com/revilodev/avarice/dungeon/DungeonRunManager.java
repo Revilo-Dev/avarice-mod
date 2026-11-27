@@ -1,7 +1,7 @@
 package com.revilodev.avarice.dungeon;
 
 import com.revilodev.avarice.Avarice;
-import com.revilodev.avarice.world.AbyssService;
+import com.revilodev.avarice.world.AbyssManager;
 import com.revilodev.avarice.world.AvariceDimensions;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,19 +21,19 @@ public final class DungeonRunManager {
     private final MinecraftServer server;
     private final DungeonRunSavedData data;
     private final DungeonAreaAllocator allocator;
-    private final PlaceholderFloorService floors;
-    private final AbyssService abyss;
-    private final DungeonTransitionService transitions;
-    private final DungeonReturnService returns;
+    private final FloorBuilder floors;
+    private final AbyssManager abyss;
+    private final DungeonTransition transitions;
+    private final DungeonReturn returns;
 
     private DungeonRunManager(MinecraftServer server) {
         this.server = server;
         this.data = DungeonRunSavedData.get(server);
         this.allocator = new DungeonAreaAllocator();
-        this.floors = new PlaceholderFloorService();
-        this.abyss = new AbyssService(server, data);
-        this.transitions = new DungeonTransitionService(server, data, allocator, floors);
-        this.returns = new DungeonReturnService(server, data, allocator, floors, abyss);
+        this.floors = new FloorBuilder();
+        this.abyss = new AbyssManager(server, data);
+        this.transitions = new DungeonTransition(server, data, allocator, floors);
+        this.returns = new DungeonReturn(server, data, allocator, floors, abyss);
         validateRestoredRuns();
     }
 
@@ -55,7 +55,7 @@ public final class DungeonRunManager {
         data.put(created);
         DungeonRun preparing = created.changeStatus(DungeonRunStatus.PREPARING, tick());
         data.put(preparing);
-        DungeonOperationResult result = transitions.transition(preparing.runId(), PlaceholderFloorService.MIN_FLOOR);
+        DungeonOperationResult result = transitions.transition(preparing.runId(), FloorBuilder.MIN_FLOOR);
         if (!result.success()) {
             DungeonRun failed = result.run().terminate(DungeonRunStatus.FAILED, tick());
             data.put(failed);
@@ -69,14 +69,14 @@ public final class DungeonRunManager {
         if (run == null) return DungeonOperationResult.failure("message.avarice.run.none", null);
         if (run.status() == DungeonRunStatus.TRANSITIONING) return reject(run, "message.avarice.run.transitioning");
         if (run.status() != DungeonRunStatus.ACTIVE) return reject(run, "message.avarice.run.invalid_transition");
-        if (run.currentFloor() >= PlaceholderFloorService.MAX_FLOOR) return reject(run, "message.avarice.run.final_floor");
+        if (run.currentFloor() >= FloorBuilder.MAX_FLOOR) return reject(run, "message.avarice.run.final_floor");
         return transitions.transition(run.runId(), run.currentFloor() + 1);
     }
 
     public DungeonOperationResult completeRun(ServerPlayer player) {
         DungeonRun run = findActiveRun(player.getUUID()).orElse(null);
         if (run == null) return DungeonOperationResult.failure("message.avarice.run.none", null);
-        if (run.status() != DungeonRunStatus.ACTIVE || run.currentFloor() != PlaceholderFloorService.MAX_FLOOR) {
+        if (run.status() != DungeonRunStatus.ACTIVE || run.currentFloor() != FloorBuilder.MAX_FLOOR) {
             return reject(run, "message.avarice.run.not_complete");
         }
         return returns.returnRun(run, DungeonRunStatus.COMPLETED);
@@ -112,7 +112,7 @@ public final class DungeonRunManager {
         }
         DungeonRun run = findActiveRun(player.getUUID()).orElse(null);
         if (run == null) return DungeonOperationResult.failure("message.avarice.run.none", null);
-        return run.currentFloor() == PlaceholderFloorService.MAX_FLOOR ? completeRun(player) : advanceFloor(player);
+        return run.currentFloor() == FloorBuilder.MAX_FLOOR ? completeRun(player) : advanceFloor(player);
     }
 
     public Optional<DungeonRun> findActiveRun(UUID playerId) {
@@ -131,9 +131,9 @@ public final class DungeonRunManager {
         } else if (run.status() == DungeonRunStatus.CREATED) {
             DungeonRun preparing = run.changeStatus(DungeonRunStatus.PREPARING, tick());
             data.put(preparing);
-            result = transitions.transition(preparing.runId(), PlaceholderFloorService.MIN_FLOOR);
+            result = transitions.transition(preparing.runId(), FloorBuilder.MIN_FLOOR);
         } else if (run.status() == DungeonRunStatus.PREPARING) {
-            result = transitions.transition(run.runId(), PlaceholderFloorService.MIN_FLOOR);
+            result = transitions.transition(run.runId(), FloorBuilder.MIN_FLOOR);
         } else if (run.status() == DungeonRunStatus.ACTIVE && transitions.restorePlayer(player, run)) {
             result = DungeonOperationResult.success("message.avarice.run.recovered", run);
         } else {
@@ -182,7 +182,7 @@ public final class DungeonRunManager {
         Set<UUID> activePlayers = new HashSet<>();
         for (DungeonRun run : data.allRuns()) {
             if (run.status().isTerminal()) continue;
-            boolean invalidFloor = run.currentFloor() < 0 || run.currentFloor() > PlaceholderFloorService.MAX_FLOOR;
+            boolean invalidFloor = run.currentFloor() < 0 || run.currentFloor() > FloorBuilder.MAX_FLOOR;
             boolean invalidTransition = run.status() == DungeonRunStatus.TRANSITIONING && !floors.supports(run.transitionTargetFloor());
             boolean duplicateSlot = activeSlots.contains(run.allocationSlot());
             boolean duplicatePlayer = run.participants().stream().anyMatch(activePlayers::contains);

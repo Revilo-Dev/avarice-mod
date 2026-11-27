@@ -10,17 +10,17 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-public final class DungeonTransitionService {
+public final class DungeonTransition {
     private final MinecraftServer server;
     private final DungeonRunSavedData data;
     private final DungeonAreaAllocator allocator;
-    private final PlaceholderFloorService floors;
+    private final FloorBuilder floors;
 
-    public DungeonTransitionService(
+    public DungeonTransition(
             MinecraftServer server,
             DungeonRunSavedData data,
             DungeonAreaAllocator allocator,
-            PlaceholderFloorService floors
+            FloorBuilder floors
     ) {
         this.server = server;
         this.data = data;

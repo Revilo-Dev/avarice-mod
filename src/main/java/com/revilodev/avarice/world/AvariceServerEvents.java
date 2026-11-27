@@ -1,7 +1,10 @@
 package com.revilodev.avarice.world;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.revilodev.avarice.Avarice;
+import com.revilodev.avarice.currency.Coins;
 import com.revilodev.avarice.dungeon.DungeonOperationResult;
 import com.revilodev.avarice.dungeon.DungeonRunManager;
 import com.revilodev.avarice.inventory.AvariceInventoryMenu;
@@ -20,6 +23,9 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import java.util.UUID;
 
 @EventBusSubscriber(modid = Avarice.MODID)
 public final class AvariceServerEvents {
@@ -27,6 +33,16 @@ public final class AvariceServerEvents {
 
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("transfer")
+                .then(Commands.argument("amount", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("id", StringArgumentType.word()).executes(context -> {
+                            ServerPlayer sender = context.getSource().getPlayerOrException();
+                            ServerPlayer target;
+                            try { target = context.getSource().getServer().getPlayerList().getPlayer(UUID.fromString(StringArgumentType.getString(context, "id"))); }
+                            catch (IllegalArgumentException exception) { context.getSource().sendFailure(Component.literal("Invalid player id")); return 0; }
+                            if (target == null || !Coins.transfer(sender, target, IntegerArgumentType.getInteger(context, "amount"))) { context.getSource().sendFailure(Component.literal("Coin transfer failed")); return 0; }
+                            return Command.SINGLE_SUCCESS;
+                        }))));
         if (!developmentEnabled()) return;
         event.getDispatcher().register(
                 Commands.literal("avarice")
@@ -41,6 +57,10 @@ public final class AvariceServerEvents {
                                     player.openMenu(new SimpleMenuProvider((containerId, inventory, ignored) -> new AvariceInventoryMenu(containerId, inventory), Component.literal("Avarice Inventory")));
                                     return Command.SINGLE_SUCCESS;
                                 }))
+                                .then(Commands.literal("debug").then(Commands.literal("coins")
+                                        .then(Commands.literal("set").then(Commands.argument("amount", IntegerArgumentType.integer(0)).executes(context -> coins(context.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(context, "amount"), true))))
+                                        .then(Commands.literal("add").then(Commands.argument("amount", IntegerArgumentType.integer(1)).executes(context -> coins(context.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(context, "amount"), false))))
+                                        .then(Commands.literal("reset").executes(context -> coins(context.getSource().getPlayerOrException(), 0, true)))))
                                 .then(Commands.literal("run")
                                         .then(Commands.literal("start").executes(context -> execute(
                                                 context.getSource(),
@@ -90,6 +110,21 @@ public final class AvariceServerEvents {
         event.getEntity().getFoodData().setSaturation(20.0F);
     }
 
+    @SubscribeEvent
+    public static void collectCoinPile(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getLevel().isClientSide() || !event.getLevel().getBlockState(event.getPos()).is(com.revilodev.avarice.registry.AvariceBlocks.COIN_PILE.get())) return;
+        ServerPlayer player = (ServerPlayer) event.getEntity();
+        Coins.add(player, 20 + player.getRandom().nextInt(31));
+        event.getLevel().removeBlock(event.getPos(), false);
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void awardDungeonMobCoins(LivingDeathEvent event) {
+        if (event.getEntity().level().isClientSide() || !event.getEntity().level().dimension().equals(AvariceDimensions.DUNGEON) || !(event.getEntity() instanceof Mob)) return;
+        if (event.getSource().getEntity() instanceof ServerPlayer player) Coins.add(player, 1 + player.getRandom().nextInt(5));
+    }
+
     private static int execute(CommandSourceStack source, DungeonOperationResult result) {
         Component message = Component.translatable(result.messageKey(), result.run() == null ? 0 : result.run().currentFloor());
         if (result.success()) source.sendSuccess(() -> message, false);
@@ -105,5 +140,11 @@ public final class AvariceServerEvents {
 
     private static boolean developmentEnabled() {
         return Boolean.getBoolean("avarice.devtools");
+    }
+
+    private static int coins(ServerPlayer player, int amount, boolean set) {
+        if (set) Coins.set(player, amount); else Coins.add(player, amount);
+        player.sendSystemMessage(Component.literal("Coins: " + Coins.balance(player)));
+        return Command.SINGLE_SUCCESS;
     }
 }

@@ -1,7 +1,7 @@
 package com.revilodev.avarice.dungeon;
 
 import com.revilodev.avarice.Avarice;
-import com.revilodev.avarice.world.AbyssService;
+import com.revilodev.avarice.world.AbyssManager;
 import com.revilodev.avarice.world.AvariceDimensions;
 import com.revilodev.avarice.world.AvariceTeleporter;
 import java.util.ArrayList;
@@ -10,19 +10,19 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-public final class DungeonReturnService {
+public final class DungeonReturn {
     private final MinecraftServer server;
     private final DungeonRunSavedData data;
     private final DungeonAreaAllocator allocator;
-    private final PlaceholderFloorService floors;
-    private final AbyssService abyss;
+    private final FloorBuilder floors;
+    private final AbyssManager abyss;
 
-    public DungeonReturnService(
+    public DungeonReturn(
             MinecraftServer server,
             DungeonRunSavedData data,
             DungeonAreaAllocator allocator,
-            PlaceholderFloorService floors,
-            AbyssService abyss
+            FloorBuilder floors,
+            AbyssManager abyss
     ) {
         this.server = server;
         this.data = data;
