@@ -19,6 +19,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = Avarice.MODID)
 public final class AvariceServerEvents {
@@ -80,6 +81,13 @@ public final class AvariceServerEvents {
                 && event.getLevel().dimension().equals(AvariceDimensions.ABYSS)) {
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void removeHunger(PlayerTickEvent.Post event) {
+        if (event.getEntity().level().isClientSide()) return;
+        event.getEntity().getFoodData().setFoodLevel(20);
+        event.getEntity().getFoodData().setSaturation(20.0F);
     }
 
     private static int execute(CommandSourceStack source, DungeonOperationResult result) {

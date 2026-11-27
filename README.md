@@ -1,6 +1,6 @@
 # Avarice Development Foundation
 
-Minecraft `26.3`, NeoForge `26.3.0.114`, ModDevGradle `2.0.148`, Java `25`, and DAQEM UI Lib `22.1.0`.
+Minecraft `26.3`, NeoForge `26.3.0.114`, ModDevGradle `2.0.148`, Java `25`.
 
 ## Run
 
@@ -8,7 +8,7 @@ Install/use JDK 25, import `build.gradle` in IntelliJ, then run `gradlew runClie
 
 ## Controls
 
-- `/avarice dev ui` opens the UI Lib development screen.
+- `/avarice dev ui` opens the development UI screen.
 - `-` toggles inspector mode on any open screen.
 - `+` requests one validated UI reload and refreshes the open development screen.
 - `/avarice dev values` reloads numeric definitions.
@@ -25,7 +25,7 @@ Install/use JDK 25, import `build.gradle` in IntelliJ, then run `gradlew runClie
 
 While development tools are enabled, saves beneath `config/avarice-dev` are debounced and routed to UI, values, or item definitions on the client thread. `F8` exposes GUI and raw coordinates, GUI scale, hovered/selected bounds, parent ID, anchor, pivot, and scale. Click an inspected configured element to select it, then use the screen controls to clear or copy its properties.
 
-The animation utility is frame-time based. `AnimationEngine` supports replacement by identifier, delays, loops, reversal, cancellation, callbacks, and the built-in easing modes. It is intentionally independent of individual UI Lib components so adapters can animate any supported UI Lib property without parsing configuration during rendering.
+The animation utility is frame-time based. `AnimationEngine` supports replacement by identifier, delays, loops, reversal, cancellation, callbacks, and the built-in easing modes. It is independent of individual screens so adapters can animate supported vanilla widget properties without parsing configuration during rendering.
 
 `values.json` contains fixed, percentage, and multiplier definitions with safe formula data. `Percentage.addPoints(5)` and `increaseRelative(5)` deliberately have distinct semantics. The current values service is client-development data only; it does not claim authority over future gameplay/server state.
 
@@ -36,9 +36,9 @@ The animation utility is frame-time based. `AnimationEngine` supports replacemen
 ## Extension Points
 
 - Implement `ReloadableDomain<T>` and register it with `ReloadManager` for future data domains.
-- `LayoutResolver` is independent of UI Lib and can be adapted to any UI Lib component tree.
+- `LayoutResolver` is independent of screen widgets and can be adapted to any client UI.
 - `UiConfigService.subscribe` lets screens rebuild only after a successful snapshot replacement.
-- UI Lib provides `AbstractScreen`, component trees, buttons, and rendering/input; Avarice provides JSON schema, validation, layout resolution, snapshots, and development tooling.
+- Avarice uses vanilla Minecraft screens and widgets alongside its JSON schema, validation, layout resolution, snapshots, and development tooling.
 - `DungeonRunManager` owns validated server-side lifecycle operations while `PlaceholderFloorService` is the replaceable Phase 2 floor provisioner.
 
 ## Verification

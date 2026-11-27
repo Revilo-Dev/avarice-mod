@@ -18,6 +18,7 @@ import com.revilodev.avarice.registry.AvariceCreativeTabs;
 import com.revilodev.avarice.registry.AvariceItems;
 import com.revilodev.avarice.registry.AvariceMenus;
 import com.revilodev.avarice.datagen.AvariceDataGenerators;
+import com.revilodev.avarice.network.AvariceNetwork;
 
 @Mod(Avarice.MODID)
 public class Avarice {
@@ -26,6 +27,7 @@ public class Avarice {
 
     public Avarice(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(AvariceDataGenerators::gatherData);
+        modEventBus.addListener(AvariceNetwork::register);
         AvariceDataComponents.COMPONENTS.register(modEventBus);
         AvariceBlocks.BLOCKS.register(modEventBus);
         AvariceItems.ITEMS.register(modEventBus);

@@ -1,6 +1,7 @@
 package com.revilodev.avarice.inventory;
 
 import com.revilodev.avarice.registry.AvariceMenus;
+import com.revilodev.avarice.persistence.PlayerDevelopmentSavedData;
 import java.util.Objects;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -12,6 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class AvariceInventoryMenu extends AbstractContainerMenu {
     private static final Identifier PRIMARY_ATTACK_SPEED = Identifier.fromNamespaceAndPath("avarice", "primary_weapon_attack_speed");
@@ -24,6 +27,9 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
         addArmorSlots(inventory);
         addMainInventorySlots(inventory);
         addHotbarSlots(inventory);
+        addSlot(new Slot(new MagnetSlotContainer(player), 0, 81, 45) {
+            @Override public int getMaxStackSize() { return 1; }
+        });
         addSlot(new Slot(inventory, 40, 81, 63) {
             @Override public void setByPlayer(ItemStack itemStack, ItemStack previous) { player.onEquipItem(EquipmentSlot.OFFHAND, previous, itemStack); super.setByPlayer(itemStack, previous); }
         });
@@ -41,13 +47,13 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
     }
 
     private void addMainInventorySlots(Inventory inventory) {
-        for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column + (row + 1) * 9, 7 + column * 18, 83 + row * 18));
+        for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column + (row + 1) * 9, 9 + column * 18, 85 + row * 18));
     }
 
     private void addHotbarSlots(Inventory inventory) {
         for (int index = 0; index < 9; index++) {
             AvariceInventorySlots.Role role = switch (index) { case 3 -> AvariceInventorySlots.Role.PRIMARY; case 4 -> AvariceInventorySlots.Role.SECONDARY; case 5 -> AvariceInventorySlots.Role.TRINKET; default -> AvariceInventorySlots.Role.GENERAL; };
-            addSlot(new RestrictedSlot(inventory, index, 7 + index * 18, 142, player, role));
+            addSlot(new RestrictedSlot(inventory, index, 9 + index * 18, 144, player, role));
         }
     }
 
@@ -70,5 +76,43 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
         private RestrictedSlot(Inventory inventory, int index, int x, int y, Player player, AvariceInventorySlots.Role role) { super(inventory, index, x, y); this.player = player; this.role = role; }
         @Override public boolean mayPlace(ItemStack stack) { return AvariceInventorySlots.mayPlace(player, role, stack); }
         @Override public void setByPlayer(ItemStack stack, ItemStack previous) { super.setByPlayer(stack, previous); AvariceInventorySlots.markPlaced(player, role, previous, stack); }
+    }
+
+    private static final class MagnetSlotContainer implements Container {
+        private final Player player;
+        private ItemStack clientItem = ItemStack.EMPTY;
+
+        private MagnetSlotContainer(Player player) { this.player = player; }
+        @Override public int getContainerSize() { return 1; }
+        @Override public boolean isEmpty() { return getItem(0).isEmpty(); }
+        @Override public ItemStack getItem(int index) { return index == 0 ? readItem() : ItemStack.EMPTY; }
+        @Override public ItemStack removeItem(int index, int amount) {
+            if (index != 0 || amount <= 0) return ItemStack.EMPTY;
+            ItemStack current = readItem();
+            ItemStack removed = current.split(amount);
+            writeItem(current);
+            return removed;
+        }
+        @Override public ItemStack removeItemNoUpdate(int index) {
+            if (index != 0) return ItemStack.EMPTY;
+            ItemStack current = readItem();
+            writeItem(ItemStack.EMPTY);
+            return current;
+        }
+        @Override public void setItem(int index, ItemStack itemStack) { if (index == 0) writeItem(itemStack); }
+        @Override public void setChanged() { }
+        @Override public boolean stillValid(Player player) { return this.player == player; }
+        @Override public void clearContent() { writeItem(ItemStack.EMPTY); }
+
+        private ItemStack readItem() {
+            if (player instanceof ServerPlayer serverPlayer) return PlayerDevelopmentSavedData.get(serverPlayer.level().getServer()).magnetSlot(player.getUUID());
+            return clientItem;
+        }
+
+        private void writeItem(ItemStack itemStack) {
+            ItemStack stored = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copyWithCount(1);
+            if (player instanceof ServerPlayer serverPlayer) PlayerDevelopmentSavedData.get(serverPlayer.level().getServer()).setMagnetSlot(player.getUUID(), stored);
+            else clientItem = stored;
+        }
     }
 }

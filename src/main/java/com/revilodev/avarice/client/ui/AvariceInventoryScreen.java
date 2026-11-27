@@ -19,17 +19,13 @@ public final class AvariceInventoryScreen extends AbstractContainerScreen<Avaric
     private static final Identifier BOOTS = sprite("boots");
     private static final Identifier OFFHAND = sprite("offhand");
     private static final Identifier MAGNET = sprite("magnet");
+    private static final Identifier SWORD = sprite("sword");
+    private static final Identifier ARTIFACT = sprite("artifact");
     private float mouseX;
     private float mouseY;
 
     public AvariceInventoryScreen(AvariceInventoryMenu menu, Inventory inventory, Component title) { super(menu, inventory, title, 178, 165); }
-    @Override protected void init() { super.init(); titleLabelX = 102; titleLabelY = 11; inventoryLabelX = 7; inventoryLabelY = 72; }
-    @Override protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        graphics.text(font, Component.literal("Stats"), 102, 11, 0xFFFFFFFF, false);
-        graphics.text(font, Component.literal("Attack speed +%.0f%%".formatted(menu.getSlot(34).hasItem() ? 5.0 : 0.0)), 102, 24, 0xFFA78BFA, false);
-        long cooldown = Math.max(AvariceInventorySlots.cooldownRemaining(minecraft.player, AvariceInventorySlots.Role.PRIMARY), Math.max(AvariceInventorySlots.cooldownRemaining(minecraft.player, AvariceInventorySlots.Role.SECONDARY), AvariceInventorySlots.cooldownRemaining(minecraft.player, AvariceInventorySlots.Role.TRINKET)));
-        if (cooldown > 0) graphics.text(font, Component.literal("Slot cooldown %.1fs".formatted(cooldown / 20.0)), 102, 36, 0xFFFFAA00, false);
-    }
+    @Override protected void init() { super.init(); leftPos--; topPos--; titleLabelX = 102; titleLabelY = 11; inventoryLabelX = 7; inventoryLabelY = 72; }
     @Override public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) { this.mouseX = mouseX; this.mouseY = mouseY; super.extractRenderState(graphics, mouseX, mouseY, partialTick); }
     @Override public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
@@ -40,8 +36,13 @@ public final class AvariceInventoryScreen extends AbstractContainerScreen<Avaric
         drawSprite(graphics, LEGGINGS, 8, 45);
         drawSprite(graphics, BOOTS, 8, 63);
         drawSprite(graphics, OFFHAND, 81, 63);
-        drawSprite(graphics, MAGNET, 81, 45);
+        drawSlotFrame(graphics, 81, 45);
+        drawSprite(graphics, MAGNET, 82, 46);
+        drawSprite(graphics, SWORD, 63, 144);
+        drawSprite(graphics, SWORD, 81, 144);
+        drawSprite(graphics, ARTIFACT, 99, 144);
     }
     private void drawSprite(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y) { graphics.blit(RenderPipelines.GUI_TEXTURED, sprite, leftPos + x, topPos + y, 0, 0, 16, 16, 16, 16); }
+    private void drawSlotFrame(GuiGraphicsExtractor graphics, int x, int y) { int left = leftPos + x; int top = topPos + y; graphics.fill(left, top, left + 18, top + 18, 0xFF0B1118); graphics.fill(left + 1, top + 1, left + 17, top + 17, 0xFF1D2834); graphics.fill(left + 2, top + 2, left + 16, top + 16, 0xFF101820); }
     private static Identifier sprite(String name) { return Identifier.fromNamespaceAndPath(Avarice.MODID, "textures/gui/sprites/" + name + ".png"); }
 }
