@@ -10,5 +10,5 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 @EventBusSubscriber(modid = Avarice.MODID, value = Dist.CLIENT)
 public final class AvariceMenuScreens {
     private AvariceMenuScreens() { }
-    @SubscribeEvent public static void register(RegisterMenuScreensEvent event) { event.register(AvariceMenus.INVENTORY.get(), AvariceInventoryScreen::new); }
+    @SubscribeEvent public static void register(RegisterMenuScreensEvent event) { event.register(AvariceMenus.INVENTORY.get(), InventoryOverrideScreen::new); }
 }

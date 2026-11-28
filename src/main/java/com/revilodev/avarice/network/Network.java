@@ -12,7 +12,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 public final class Network {
-    public static final String PROTOCOL_VERSION = "1";
+    public static final String PROTOCOL_VERSION = "2";
 
     private Network() { }
 
@@ -33,7 +33,7 @@ public final class Network {
     }
 
     public static void sendPlayerData(ServerPlayer player, PlayerData data) {
-        PacketDistributor.sendToPlayer(player, new PlayerDataPayload(data.playerId(), data.revision()));
+        PacketDistributor.sendToPlayer(player, new PlayerDataPayload(data.playerId(), data.revision(), data.coins()));
     }
 
     private static void handleItemDefinitions(ItemDefinitionsPayload payload, net.neoforged.neoforge.network.handling.IPayloadContext context) {
@@ -62,7 +62,7 @@ public final class Network {
     private static void handlePlayerData(PlayerDataPayload payload, net.neoforged.neoforge.network.handling.IPayloadContext context) {
         context.enqueueWork(() -> {
             long start = System.nanoTime();
-            ClientDevelopmentState.apply(payload.playerId(), payload.revision());
+            ClientDevelopmentState.apply(payload.playerId(), payload.revision(), payload.coins());
             Profiler.record("network.player_development", start);
         });
     }
@@ -70,6 +70,7 @@ public final class Network {
     private static void handleOpenInventory(OpenAvariceInventoryPayload payload, net.neoforged.neoforge.network.handling.IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
+                sendPlayerData(player, com.revilodev.avarice.persistence.PlayerDataStore.get(player.level().getServer()).getOrCreate(player.getUUID()));
                 player.openMenu(new net.minecraft.world.SimpleMenuProvider((containerId, inventory, ignored) -> new AvariceInventoryMenu(containerId, inventory), Component.literal("Avarice Inventory")));
             }
         });

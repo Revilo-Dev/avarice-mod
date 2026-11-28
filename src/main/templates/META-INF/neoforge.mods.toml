@@ -34,3 +34,10 @@ Example mod description.
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="levelup"
+    type="required"
+    versionRange="[26.3-neo-6.0,)"
+    ordering="AFTER"
+    side="BOTH"

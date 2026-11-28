@@ -9,13 +9,13 @@ public final class ClientDevelopmentState {
 
     private ClientDevelopmentState() { }
 
-    public static void apply(UUID playerId, int revision) {
-        ACTIVE.set(new Snapshot(playerId, revision));
+    public static void apply(UUID playerId, int revision, long coins) {
+        ACTIVE.set(new Snapshot(playerId, revision, coins));
     }
 
     public static Optional<Snapshot> current() {
         return Optional.ofNullable(ACTIVE.get());
     }
 
-    public record Snapshot(UUID playerId, int revision) { }
+    public record Snapshot(UUID playerId, int revision, long coins) { }
 }

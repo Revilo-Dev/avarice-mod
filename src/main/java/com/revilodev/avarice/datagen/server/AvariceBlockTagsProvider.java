@@ -17,6 +17,9 @@ public final class AvariceBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(AvariceTags.Blocks.DEVELOPMENT_BLOCKS).add(net.minecraft.resources.ResourceKey.create(Registries.BLOCK, AvariceBlocks.DUNGEON_GATEWAY.getId()));
+        tag(AvariceTags.Blocks.DEVELOPMENT_BLOCKS).add(
+                net.minecraft.resources.ResourceKey.create(Registries.BLOCK, AvariceBlocks.DUNGEON_GATEWAY.getId()),
+                net.minecraft.resources.ResourceKey.create(Registries.BLOCK, AvariceBlocks.COIN_PILE.getId())
+        );
     }
 }

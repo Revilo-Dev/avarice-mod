@@ -2,6 +2,7 @@ package com.revilodev.avarice.world;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.revilodev.avarice.Avarice;
 import com.revilodev.avarice.currency.Coins;
@@ -33,6 +34,12 @@ public final class AvariceServerEvents {
 
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("coins")
+                .executes(context -> showCoins(context.getSource().getPlayerOrException(), context.getSource()))
+                .then(Commands.literal("set").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .then(Commands.argument("amount", LongArgumentType.longArg(0)).executes(context -> coins(context.getSource().getPlayerOrException(), LongArgumentType.getLong(context, "amount"), true))))
+                .then(Commands.literal("add").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .then(Commands.argument("amount", LongArgumentType.longArg(1)).executes(context -> coins(context.getSource().getPlayerOrException(), LongArgumentType.getLong(context, "amount"), false)))));
         event.getDispatcher().register(Commands.literal("transfer")
                 .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                         .then(Commands.argument("id", StringArgumentType.word()).executes(context -> {
@@ -81,7 +88,10 @@ public final class AvariceServerEvents {
 
     @SubscribeEvent
     public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) DungeonRunManager.get(player.level().getServer()).reconcile(player);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            DungeonRunManager.get(player.level().getServer()).reconcile(player);
+            com.revilodev.avarice.network.Network.sendPlayerData(player, com.revilodev.avarice.persistence.PlayerDataStore.get(player.level().getServer()).getOrCreate(player.getUUID()));
+        }
     }
 
     @SubscribeEvent
@@ -142,7 +152,12 @@ public final class AvariceServerEvents {
         return Boolean.getBoolean("avarice.devtools");
     }
 
-    private static int coins(ServerPlayer player, int amount, boolean set) {
+    private static int showCoins(ServerPlayer player, CommandSourceStack source) {
+        source.sendSuccess(() -> Component.literal("Coins: " + Coins.balance(player)), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int coins(ServerPlayer player, long amount, boolean set) {
         if (set) Coins.set(player, amount); else Coins.add(player, amount);
         player.sendSystemMessage(Component.literal("Coins: " + Coins.balance(player)));
         return Command.SINGLE_SUCCESS;

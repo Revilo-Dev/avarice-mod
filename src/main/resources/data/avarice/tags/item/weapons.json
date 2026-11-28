@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "avarice:mana_steel_sword",
+    "avarice:elixrite_sword",
+    "avarice:astrite_sword",
+    "avarice:lunarium_sword",
+    "avarice:ignite_sword",
+    "avarice:iridium_sword",
+    "avarice:mythril_sword",
+    "avarice:arcanium_sword",
+    "avarice:prismatic_steel_sword",
+    "avarice:mana_steel_paxel",
+    "avarice:elixrite_paxel",
+    "avarice:astrite_paxel",
+    "avarice:lunarium_paxel",
+    "avarice:ignite_paxel",
+    "avarice:iridium_paxel",
+    "avarice:mythril_paxel",
+    "avarice:arcanium_paxel",
+    "avarice:prismatic_steel_paxel"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "avarice:mana_steel_magnet",
+    "avarice:dungeon_magnet",
+    "avarice:elixrite_magnet",
+    "avarice:astrite_magnet",
+    "avarice:lunarium_magnet",
+    "avarice:ignite_magnet",
+    "avarice:iridium_magnet",
+    "avarice:mythril_magnet",
+    "avarice:arcanium_magnet",
+    "avarice:prismatic_steel_magnet"
+  ]
+}

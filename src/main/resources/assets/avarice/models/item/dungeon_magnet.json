@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "avarice:gear/magnet/mana-steel_magnet"
+  }
+}

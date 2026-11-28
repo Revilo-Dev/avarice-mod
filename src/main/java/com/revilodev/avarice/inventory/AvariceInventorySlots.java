@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 public final class AvariceInventorySlots {
     public static final TagKey<Item> WEAPONS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.fromNamespaceAndPath(Avarice.MODID, "weapons"));
     public static final TagKey<Item> TRINKETS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.fromNamespaceAndPath(Avarice.MODID, "trinkets"));
+    public static final TagKey<Item> MAGNETS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.fromNamespaceAndPath(Avarice.MODID, "magnets"));
     public static final long REPLACEMENT_COOLDOWN_TICKS = 20L * 10L;
     private static final Map<UUID, long[]> COOLDOWNS = new ConcurrentHashMap<>();
 

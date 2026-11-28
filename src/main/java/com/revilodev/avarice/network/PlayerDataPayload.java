@@ -8,16 +8,17 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
-public record PlayerDataPayload(UUID playerId, int revision) implements CustomPacketPayload {
+public record PlayerDataPayload(UUID playerId, int revision, long coins) implements CustomPacketPayload {
     public static final Type<PlayerDataPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(Avarice.MODID, "player_development_data"));
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayerDataPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.stringUtf8(36), payload -> payload.playerId().toString(),
             ByteBufCodecs.VAR_INT, PlayerDataPayload::revision,
-            (playerId, revision) -> new PlayerDataPayload(UUID.fromString(playerId), revision)
+            ByteBufCodecs.VAR_LONG, PlayerDataPayload::coins,
+            (playerId, revision, coins) -> new PlayerDataPayload(UUID.fromString(playerId), revision, coins)
     ).cast();
 
     public PlayerDataPayload {
-        if (playerId == null || revision < 0) throw new IllegalArgumentException("Invalid player development payload");
+        if (playerId == null || revision < 0 || coins < 0) throw new IllegalArgumentException("Invalid player development payload");
     }
 
     @Override

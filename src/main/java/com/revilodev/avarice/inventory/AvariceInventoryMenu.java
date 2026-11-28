@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 public final class AvariceInventoryMenu extends AbstractContainerMenu {
     private static final Identifier PRIMARY_ATTACK_SPEED = Identifier.fromNamespaceAndPath("avarice", "primary_weapon_attack_speed");
     private static final AttributeModifier PRIMARY_ATTACK_SPEED_MODIFIER = new AttributeModifier(PRIMARY_ATTACK_SPEED, 0.05, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
-    public static final int HOTBAR_SLOT_Y = 143;
+    public static final int HOTBAR_SLOT_Y = 142;
     private final Player player;
 
     public AvariceInventoryMenu(int containerId, Inventory inventory) {
@@ -28,10 +28,11 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
         addArmorSlots(inventory);
         addMainInventorySlots(inventory);
         addHotbarSlots(inventory);
-        addSlot(new Slot(new MagnetSlotContainer(player), 0, 81, 45) {
+        addSlot(new Slot(new MagnetSlotContainer(player), 0, 81, 44) {
+            @Override public boolean mayPlace(ItemStack stack) { return stack.is(AvariceInventorySlots.MAGNETS); }
             @Override public int getMaxStackSize() { return 1; }
         });
-        addSlot(new Slot(inventory, 40, 81, 63) {
+        addSlot(new Slot(inventory, 40, 81, 62) {
             @Override public void setByPlayer(ItemStack itemStack, ItemStack previous) { player.onEquipItem(EquipmentSlot.OFFHAND, previous, itemStack); super.setByPlayer(itemStack, previous); }
         });
     }
@@ -40,7 +41,7 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
         EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
         for (int index = 0; index < slots.length; index++) {
             EquipmentSlot equipmentSlot = slots[index];
-            addSlot(new Slot(inventory, 39 - index, 8, 9 + index * 18) {
+            addSlot(new Slot(inventory, 39 - index, 8, 8 + index * 18) {
                 @Override public boolean mayPlace(ItemStack stack) { return player.getEquipmentSlotForItem(stack) == equipmentSlot; }
                 @Override public int getMaxStackSize() { return 1; }
             });
@@ -48,18 +49,18 @@ public final class AvariceInventoryMenu extends AbstractContainerMenu {
     }
 
     private void addMainInventorySlots(Inventory inventory) {
-        for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column + (row + 1) * 9, 9 + column * 18, 85 + row * 18));
+        for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column + (row + 1) * 9, 8 + column * 18, 84 + row * 18));
     }
 
     private void addHotbarSlots(Inventory inventory) {
         for (int index = 0; index < 9; index++) {
-            AvariceInventorySlots.Role role = switch (index) { case 3 -> AvariceInventorySlots.Role.PRIMARY; case 4 -> AvariceInventorySlots.Role.SECONDARY; case 5 -> AvariceInventorySlots.Role.TRINKET; default -> AvariceInventorySlots.Role.GENERAL; };
+            AvariceInventorySlots.Role role = switch (index) { case 3 -> AvariceInventorySlots.Role.SECONDARY; case 4 -> AvariceInventorySlots.Role.PRIMARY; case 5 -> AvariceInventorySlots.Role.TRINKET; default -> AvariceInventorySlots.Role.GENERAL; };
             addSlot(new RestrictedSlot(inventory, index, hotbarSlotX(index), HOTBAR_SLOT_Y, player, role));
         }
     }
 
     public static int hotbarSlotX(int index) {
-        return 9 + index * 18 - (index < 2 ? 1 : 0);
+        return 8 + index * 18;
     }
 
     @Override public void broadcastChanges() { super.broadcastChanges(); updatePrimaryAttackSpeed(); }

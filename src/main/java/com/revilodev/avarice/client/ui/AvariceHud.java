@@ -2,6 +2,7 @@ package com.revilodev.avarice.client.ui;
 
 import com.revilodev.avarice.Avarice;
 import com.revilodev.avarice.client.devtools.ScreenInspectorOverlay;
+import com.revilo.levelup.api.LevelUpClientApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -43,46 +44,47 @@ public final class AvariceHud {
         if (player == null) return;
 
         int x = (graphics.guiWidth() - 182) / 2;
-        int y = graphics.guiHeight() - 44;
+        int y = graphics.guiHeight() - 48;
         graphics.blit(RenderPipelines.GUI_TEXTURED, HUD, x, y, 0, 0, 182, 44, 182, 44);
         renderBars(graphics, minecraft.font, player, x, y);
-        renderHotbar(graphics, minecraft.font, player, x, y);
+        renderHotbar(graphics, minecraft.font, player, x, y + 4);
         ScreenInspectorOverlay.renderCursorCoordinates(graphics);
     }
 
     private static void renderBars(GuiGraphicsExtractor graphics, Font font, Player player, int x, int y) {
-        graphics.fill(x, y + 16, x + 85, y + 21, 0xFF070A0E);
-        graphics.fill(x + 97, y + 16, x + 182, y + 21, 0xFF070A0E);
         int soulsWidth = Mth.clamp(Math.round(player.experienceProgress * 84), 0, 84);
         if (soulsWidth > 0) graphics.blit(RenderPipelines.GUI_TEXTURED, SOULS, x + 3, y + 18, 0, 0, soulsWidth, 3, 84, 3);
-        int levelWidth = Mth.clamp(Math.round(Math.min(player.experienceLevel, 100) / 100.0F * 83), 0, 83);
+        var levelDisplay = LevelUpClientApi.getLocalLevelProgressDisplay();
+        float levelProgress = levelDisplay == null ? 0.0F : levelDisplay.progress();
+        int level = levelDisplay == null ? 0 : levelDisplay.level();
+        int levelWidth = Mth.clamp(Math.round(levelProgress * 83), 0, 83);
         if (levelWidth > 0) graphics.blit(RenderPipelines.GUI_TEXTURED, LEVEL, x + 179 - levelWidth, y + 18, 83 - levelWidth, 0, levelWidth, 3, 83, 3);
         float healthRatio = player.getMaxHealth() <= 0 ? 0 : player.getHealth() / player.getMaxHealth();
         int healthHeight = Math.max(1, Math.round(18 * healthRatio));
-        if (healthRatio > 0) graphics.blit(RenderPipelines.GUI_TEXTURED, HEALTH, x + 83, y + 20 - healthHeight, 0, 18 - healthHeight, 19, healthHeight, 19, 18);
-        outlinedCentered(graphics, font, Math.round(player.experienceProgress * 100) + "%", x + 43, y + 14, 0xFFE9B8FF);
-        outlinedCentered(graphics, font, Integer.toString(player.experienceLevel), x + 139, y + 14, 0xFFB8DEFF);
+        if (healthRatio > 0) graphics.blit(RenderPipelines.GUI_TEXTURED, HEALTH, x + 82, y + 21 - healthHeight, 0, 18 - healthHeight, 19, healthHeight, 19, 18);
+        outlinedCenteredSmall(graphics, font, Math.round(player.experienceProgress * 100) + "%", x + 43, y + 14, 0xFFE9B8FF);
+        outlinedCenteredSmall(graphics, font, Integer.toString(level), x + 139, y + 14, 0xFFB8DEFF);
         outlinedCentered(graphics, font, Integer.toString(Mth.ceil(player.getHealth())), x + 92, y + 9, 0xFFFFB8B8);
     }
 
     private static void renderHotbar(GuiGraphicsExtractor graphics, Font font, Player player, int x, int y) {
         int selected = player.getInventory().getSelectedSlot();
         int slotY = y + HOTBAR_SLOT_Y;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, SELECTED_SLOT, hotbarSlotX(x, selected), slotY, 0, 0, 18, 18, 18, 18);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, SELECTED_SLOT, hotbarSlotX(x, selected), slotY - 1, 0, 0, 18, 18, 18, 18);
         for (int index = 0; index < 9; index++) {
             ItemStack stack = player.getInventory().getItem(index);
-            int itemY = slotY + SLOT_CONTENT_INSET;
+            int itemY = slotY + SLOT_CONTENT_INSET - 1;
             int slotX = hotbarSlotX(x, index) + SLOT_CONTENT_INSET;
             graphics.item(player, stack, slotX, itemY, 0);
             graphics.itemDecorations(font, stack, slotX, itemY);
         }
         ItemStack offhand = player.getOffhandItem();
         if (!offhand.isEmpty()) {
-            int offhandX = x - 21;
+            int offhandX = x - 24;
             int offhandY = y + 19;
             graphics.blit(RenderPipelines.GUI_TEXTURED, OFFHAND, offhandX, offhandY, 0, 0, 22, 22, 22, 22);
-            graphics.item(player, offhand, offhandX + 3, offhandY + 3, 0);
-            graphics.itemDecorations(font, offhand, offhandX + 3, offhandY + 3);
+            graphics.item(player, offhand, offhandX + 3, offhandY + 2, 0);
+            graphics.itemDecorations(font, offhand, offhandX + 3, offhandY + 2);
         }
     }
 
@@ -97,6 +99,14 @@ public final class AvariceHud {
         graphics.text(font, value, x, y - 1, 0xFF000000, false);
         graphics.text(font, value, x, y + 1, 0xFF000000, false);
         graphics.text(font, value, x, y, color, false);
+    }
+
+    private static void outlinedCenteredSmall(GuiGraphicsExtractor graphics, Font font, String value, int centerX, int y, int color) {
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(centerX, y);
+        graphics.pose().scale(0.8F);
+        outlinedCentered(graphics, font, value, 0, 0, color);
+        graphics.pose().popMatrix();
     }
 
     private static Identifier texture(String name) {
